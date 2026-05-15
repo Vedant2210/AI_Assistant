@@ -1,0 +1,32 @@
+.results-page { display: flex; flex-direction: column; align-items: center; gap: 40px; }
+
+/* Score card */
+.score-card { padding: 40px; text-align: center; max-width: 420px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+.score-emoji { font-size: 2.5rem; }
+.score-label { font-size: 1.6rem; font-weight: 800; }
+
+.score-ring { position: relative; width: 160px; height: 160px; }
+.score-ring svg { width: 100%; height: 100%; }
+.score-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.score-pct { font-size: 2.2rem; font-weight: 800; line-height: 1; }
+.score-fraction { font-size: 0.85rem; color: var(--text-muted); }
+
+.score-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+/* Review */
+.review-section { width: 100%; max-width: 680px; display: flex; flex-direction: column; gap: 14px; }
+.review-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; }
+
+.review-card { padding: 20px 22px; display: flex; flex-direction: column; gap: 8px; }
+.review-correct { border-color: rgba(16,185,129,0.25); }
+.review-wrong { border-color: rgba(239,68,68,0.2); }
+
+.review-header { display: flex; align-items: center; justify-content: space-between; }
+.review-num { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+.review-status { font-size: 0.82rem; font-weight: 600; }
+
+.review-question { font-size: 0.92rem; font-weight: 600; line-height: 1.4; }
+.review-answers { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
+.your-ans, .correct-ans { font-size: 0.82rem; color: var(--text-muted); }
+.your-ans span { color: #f87171; font-weight: 600; }
+.correct-ans span { color: #34d399; font-weight: 600; }

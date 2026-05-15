@@ -1,0 +1,25 @@
+.loader-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+}
+.loader-dots {
+  display: flex;
+  gap: 6px;
+}
+.loader-dots span {
+  width: 8px; height: 8px;
+  background: var(--primary-light);
+  border-radius: 50%;
+  animation: bounce 1.2s infinite ease-in-out;
+}
+.loader-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loader-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+.loader-text { color: var(--text-muted); font-size: 0.85rem; }
