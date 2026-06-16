@@ -1,10 +1,13 @@
 const OpenAI = require('openai');
+const { HfInference } = require('@huggingface/inference');
 require('dotenv').config();
 
 const client = new OpenAI({
   apiKey: process.env.HF_API_TOKEN,
   baseURL: 'https://router.huggingface.co/v1',
 });
+
+const hf = new HfInference(process.env.HF_API_TOKEN);
 
 async function askQuestion(context, question) {
   const response = await client.chat.completions.create({
@@ -55,4 +58,13 @@ JSON array:`,
   return JSON.parse(match[0]);
 }
 
-module.exports = { askQuestion, generateMCQs };
+async function generateEmbeddings(texts) {
+  // Using feature extraction from the native sdk
+  const result = await hf.featureExtraction({
+    model: 'sentence-transformers/all-MiniLM-L6-v2',
+    inputs: texts,
+  });
+  return result;
+}
+
+module.exports = { askQuestion, generateMCQs, generateEmbeddings };

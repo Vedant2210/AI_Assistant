@@ -6,6 +6,7 @@ const documentSchema = new mongoose.Schema({
   fileType: { type: String, default: 'pdf' },
   extractedText: { type: String, required: true },
   chunks: [{ type: String }],
+  chunkEmbeddings: [[{ type: Number }]], // Added for vectors
   pageCount: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
 });

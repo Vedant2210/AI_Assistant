@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useApp } from '../context/AppContext';
-import { uploadDocument } from '../services/api';
+import { useDropzone } from 'react-dropzone';//Memoizes a function so React doesn't recreate it every render.
+import { useNavigate } from 'react-router-dom'; //Used for page navigation.
+import { motion, AnimatePresence } from 'framer-motion';//Used for animations.
+import { useApp } from '../context/AppContext';  //Used to access global state.
+import { uploadDocument } from '../services/api'; //Used to upload documents.
 import './UploadPage.css';
 
 export default function UploadPage() {
@@ -16,11 +16,11 @@ export default function UploadPage() {
 
   const onDrop = useCallback((accepted) => {
     if (accepted.length > 0) setSelectedFile(accepted[0]);
-  }, []);
+  }, []);//Memoizes a function so React doesn't recreate it every render.
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: { 
+    accept: {
       'application/pdf': ['.pdf'],
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
       'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx']
@@ -33,19 +33,22 @@ export default function UploadPage() {
     setStatus('uploading');
     setProgress(0);
     setErrorMsg('');
-
+    console.log(progress);
     try {
       const formData = new FormData();
       formData.append('pdf', selectedFile);
       const { data } = await uploadDocument(formData, setProgress);
-
+      console.log(data);
+      //Store returned data globally
       setDocumentId(data.documentId);
       setFilename(data.filename);
       setPageCount(data.pageCount);
+      //Reset quiz
       setQuizData(null);
       setUserAnswers({});
       setStatus('done');
-      setTimeout(() => navigate('/study'), 800);
+      //wait 800ms then move to /study
+      setTimeout(() => navigate('/study'), 100);
     } catch (err) {
       setErrorMsg(err.response?.data?.error || 'Upload failed. Please try again.');
       setStatus('error');

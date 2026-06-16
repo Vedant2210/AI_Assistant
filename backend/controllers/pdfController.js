@@ -1,10 +1,13 @@
-const fs = require('fs');
-const pdfParse = require('pdf-parse');
-const officeParser = require('officeparser');
-const Document = require('../models/Document');
-const { chunkText } = require('../utils/chunker');
+const fs = require('fs'); //Used to read and delete files.
+const pdfParse = require('pdf-parse'); //Used to parse PDF files.
+const officeParser = require('officeparser'); //Used to parse DOCX and PPTX files.
+const Document = require('../models/Document'); //Used to store document data.
+const { chunkText } = require('../utils/chunker'); //Used to chunk text.
+const { generateEmbeddings } = require('../utils/hfClient');
 
 const uploadDocument = async (req, res) => {
+  console.log(req.file);
+  console.log(req.file.path);
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
 
@@ -24,7 +27,7 @@ const uploadDocument = async (req, res) => {
         // For Office docs, page count is hard to determine accurately without complex libs,
         // so we'll set it to 1 or estimate based on length if needed.
         // For now, let's keep it simple.
-        pageCount = 1; 
+        pageCount = 1;
       }
     } catch (parseErr) {
       console.error('File parsing failed:', parseErr);
@@ -35,7 +38,21 @@ const uploadDocument = async (req, res) => {
       return res.status(400).json({ error: 'No text could be extracted from this document.' });
     }
 
-    const chunks = chunkText(extractedText, 800);
+    const chunks = chunkText(extractedText, 100);
+
+    let chunkEmbeddings = [];
+    try {
+      // Small batches to prevent API limits if the document is very large
+      const batchSize = 20;
+      for (let i = 0; i < chunks.length; i += batchSize) {
+        const batch = chunks.slice(i, i + batchSize);
+        const embeddingsBatch = await generateEmbeddings(batch);
+        chunkEmbeddings.push(...embeddingsBatch);
+      }
+    } catch (embErr) {
+      console.error('Embedding generation failed:', embErr);
+      return res.status(500).json({ error: `Failed to generate embeddings: ${embErr.message}` });
+    }
 
     const document = new Document({
       filename: req.file.filename,
@@ -43,11 +60,12 @@ const uploadDocument = async (req, res) => {
       fileType: req.file.mimetype.includes('pdf') ? 'pdf' : (req.file.mimetype.includes('word') ? 'docx' : 'pptx'),
       extractedText,
       chunks,
+      chunkEmbeddings,
       pageCount,
     });
 
     await document.save();
-    fs.unlinkSync(req.file.path);
+    fs.unlinkSync(req.file.path);//Delete uploaded file after processing.
 
     res.json({
       success: true,
@@ -56,6 +74,7 @@ const uploadDocument = async (req, res) => {
       fileType: document.fileType,
       pageCount: document.pageCount,
       chunkCount: chunks.length,
+      extractedText: extractedText,
     });
   } catch (err) {
     console.error('Upload error details:', err);

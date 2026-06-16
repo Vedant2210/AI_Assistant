@@ -1,6 +1,6 @@
 const Document = require('../models/Document');
-const { askQuestion } = require('../utils/hfClient');
-const { findRelevantChunks } = require('../utils/chunker');
+const { askQuestion, generateEmbeddings } = require('../utils/hfClient');
+const { findRelevantChunksByEmbedding } = require('../utils/chunker');
 
 const chat = async (req, res) => {
   try {
@@ -11,9 +11,14 @@ const chat = async (req, res) => {
     const document = await Document.findById(documentId);
     if (!document) return res.status(404).json({ error: 'Document not found' });
 
-    const relevantChunks = findRelevantChunks(document.chunks, question, 3);
-    const context = relevantChunks.join('\n\n');
+    const questionEmbeddings = await generateEmbeddings([question]);
+    const questionEmbedding = questionEmbeddings[0];
 
+    const relevantChunks = findRelevantChunksByEmbedding(document.chunks, document.chunkEmbeddings, questionEmbedding, 3);
+    const context = relevantChunks.join('\n\n');
+    console.log("Question:", question);
+console.log("Relevant Chunks:");
+console.log(relevantChunks);
     const answer = await askQuestion(context, question);
     res.json({ answer });
   } catch (err) {
